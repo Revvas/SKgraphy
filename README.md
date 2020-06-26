@@ -1,0 +1,1 @@
+This program just change bytes of message in wav file depending on the password what you enter
