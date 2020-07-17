@@ -34,6 +34,11 @@ void Choice();
 
 int main() {
 	Choice();
+
+	//Delete temporary files
+	remove(algoritmTemp.c_str());
+	remove(audioTemp.c_str());
+
 	return 0;
 }
 
@@ -90,7 +95,7 @@ void Choice(){
 			 cin >> password;
 
 			Code(originalAudioFile, newAudioFile, message, password); 
-			exit(0); 
+			return; 
 		}
 
 		case '1': { 
@@ -100,10 +105,10 @@ void Choice(){
 			 cin >> password;
 
 			Encode(newAudioFile, password); 
-			exit(0);
+			return;
 		}
 
-		case '2': {cout << endl << "My work here is done"; exit(0); }
+		case '2': {cout << endl << "My work here is done"; return; }
 		default: { cout << endl << endl << "Incorrect in, try again" << endl << endl; Choice(); }
 	}
 }
