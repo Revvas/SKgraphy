@@ -12,24 +12,60 @@ string originalAudioFile;
 string newAudioFile;
 
 //Programm files
-const string AlgoritmTemp = "Temp//ALGTEMP.txt";//temp
-const string AudioTemp = "Temp//AudioTemp.txt";//temp
-const string alfPass = "Temp//alfpass.txt"; //Symbols for password
+const string algoritmTemp = "Temp//AlgTemp";//temp
+const string audioTemp = "Temp//AudioTemp";//temp
+const string alfPass = "alfass.txt"; //Symbols for password
 
 //Global
-const int lenpass = 62;//len of alfPass
-int position[lenpass];
+const int lenPass = 62;//len of alfPass
+int position[lenPass];
 
+//Functions
 void Code(string originalAudioFile, string newAudioFile, string message, string password);
 void Encode(string newAudioFile, string password);
-int transform(string origAfile, string Atemp);
-void algoritm(string alfPass, string password, int numAudTemp);
-void appAlg(int numAudTemp, string AudioTemp, string AlgoritmTemp, string message, string password);
-void alttransform(string newAudioFile, string AudioTemp, int numAudTemp);
-void appAltAlg(string AudioTemp, string password, int numAudTemp);
+int  Transform(string origAfile, string Atemp);
+void Algoritm(string alfPass, string password, int numAudTemp);
+void ApplyAlg(int numAudTemp, string audioTemp, string algoritmTemp, string message, string password);
+void AltTransform(string newAudioFile, string audioTemp, int numAudTemp);
+string ApplyAltAlg(string audioTemp, string password, int numAudTemp);
 
+
+void Choice();
 
 int main() {
+	Choice();
+	return 0;
+}
+
+void Code(string originalAudioFile, string newAudioFile, string message, string password)
+{
+		cout << "Transform file to bites" << endl;
+	int numAudTemp = Transform(originalAudioFile, audioTemp);	//get file lenght
+	
+		cout<< "Calculate" << endl;
+	Algoritm(alfPass, password, numAudTemp);
+	
+		cout << "Apply algoritm" << endl;
+	ApplyAlg(numAudTemp, audioTemp, algoritmTemp, message, password);
+	
+		cout << "Transform file back" << endl;
+	AltTransform(newAudioFile, algoritmTemp, numAudTemp);//Transform back
+}
+
+void Encode(string newAudioFile, string password)
+{
+		cout << "Transform file to bites" << endl;
+	int numAudTemp = Transform(newAudioFile, audioTemp);	//get file lenght
+
+		cout << "Apply algoritm" << endl;
+	Algoritm(alfPass, password, numAudTemp);		
+
+		cout << "Get message" << endl;
+	string m = ApplyAltAlg(audioTemp, password, numAudTemp);		
+	cout << "Message: " << m << endl;		
+}
+
+void Choice(){
 	string Choise; char ch;
 	cout << "Choise option: Code(0); Encode(1); Exit(2)" << endl << "Option:";
 	cin >> Choise; 
@@ -45,64 +81,49 @@ int main() {
 		case '0': { 
 			cout << "Enter original file path:";
 			cin  >> originalAudioFile;
-
-			cout << "Enter new file path:";
-			cin  >> newAudioFile;
-
+			 cout << "Enter new file path:";
+			 cin  >> newAudioFile;
 			cout << endl << "Enter a message (@ and = characters are not recommended):";
 			cin >> message;
 			message = "@" + message + "="; 
+			 cout << endl << "Enter the password(from the Latin alphabet and Arabic numerals):";
+			 cin >> password;
 
-			cout << endl << "Enter the password(from the Latin alphabet and Arabic numerals):";
-			cin >> password;
-			
 			Code(originalAudioFile, newAudioFile, message, password); 
-			cout << endl << endl << "Code successfully" << endl << endl;  main(); }
+			exit(0); 
+		}
 
 		case '1': { 
 			cout << "Enter file path:";
 			cin  >> newAudioFile;
-
-			cout << endl << "Enter the password(from the Latin alphabet and Arabic numerals):";
-			cin >> password;
+			 cout << endl << "Enter the password(from the Latin alphabet and Arabic numerals):";
+			 cin >> password;
 
 			Encode(newAudioFile, password); 
-			cout << endl << endl << "Encode successfully" << endl << endl; main(); }
+			exit(0);
+		}
 
-		case '2': {cout << endl << "My work here is done"; return 0; }
-		default: { cout << endl << endl << "Incorrect in, try again" << endl << endl; main(); }
+		case '2': {cout << endl << "My work here is done"; exit(0); }
+		default: { cout << endl << endl << "Incorrect in, try again" << endl << endl; Choice(); }
 	}
 }
 
-void Code(string originalAudioFile, string newAudioFile, string message, string password)
-{
-	int numAudTemp = transform(originalAudioFile, AudioTemp);
-	algoritm(alfPass, password, numAudTemp);
-	appAlg(numAudTemp, AudioTemp, AlgoritmTemp, message, password);
-	alttransform(newAudioFile, AlgoritmTemp, numAudTemp);
-}
 
-void Encode(string newAudioFile, string password)
-{
-	int numAudTemp = transform(newAudioFile, AudioTemp);
-	algoritm(alfPass, password, numAudTemp);
-	appAltAlg(AudioTemp, password, numAudTemp);
-}
-
-
-int transform(string AudioFile, string AudioTemp) 
+int Transform(string AudioFile, string audioTemp) 
 {
 	ifstream infile(AudioFile, ios::binary);
-	ofstream outfile(AudioTemp, ios::binary);
+	ofstream outfile(audioTemp, ios::binary);
 
 	char bt;
-	int numAudTemp = 0;
+	int numAudTemp = 0;//bite lenght of file
 
+	//File to array
 	while (!infile.eof()) {
 		infile >> bt;
 		numAudTemp++;
 	}
 
+	//File size rounding(Because Transform changed size, we need same size for future)
 	string str = to_string(numAudTemp); int h = str.length()-1;
 	int g=1;
 	for (int i = 0; i < h; i++)
@@ -113,8 +134,9 @@ int transform(string AudioFile, string AudioTemp)
 	infile.clear();
 	infile.seekg(0);
 
-	char* buffer = new char[numAudTemp];
 
+	//Transform and write
+	char* buffer = new char[numAudTemp];
 	infile.read(buffer, numAudTemp);
 
 	int H; 
@@ -122,40 +144,40 @@ int transform(string AudioFile, string AudioTemp)
 		H = (byte)buffer[i];
 		outfile << H << endl;
 	}
-
 	delete[] buffer;
 	
 	infile.close();
 	outfile.close();
 
-	cout << endl << "[##########....................]" << endl;
 	return numAudTemp;
 }
 
-void algoritm(string alfPass, string password, int numAudTemp)
+void Algoritm(string alfPass, string password, int numAudTemp)
 {
+
+	//AlfPass to array
 	ifstream alfPassAlg(alfPass, ios::binary); 
 
-	int h = 0; char arrPass[lenpass];
-	while (h<lenpass)
+	int h = 0; char arrPass[lenPass];
+	while (h<lenPass)
 	{
 		alfPassAlg >> arrPass[h]; 
 		h++;
 	}
-
 	alfPassAlg.close();
 
-	int algnum = (numAudTemp / lenpass) / 2;
+	int algnum = (numAudTemp / lenPass) / 2; //1 password symbol on symbols in file
+	//Null array
+	memset(position, 0, (sizeof(int)*lenPass) + 1);
 
-	memset(position, 0, (sizeof(int)*lenpass) + 1);
-
+	//Swap bites
 	for (int i = 0, j = 0; i < password.length();)
 	{
 		if (password[i] == arrPass[j]) {
 			position[i] = (j+1) * algnum; i++; j = 0;
 		}
 		else if (position[i] == 0) {
-			for (int jj = 0; jj < (lenpass); jj++)//!!!
+			for (int jj = 0; jj < (lenPass); jj++)//!!!
 			{
 				if (500 + position[jj + i] < numAudTemp) position[jj + i] += 500;
 				else if (50 + position[jj + i] < numAudTemp) position[jj + i] += 50;
@@ -167,9 +189,9 @@ void algoritm(string alfPass, string password, int numAudTemp)
 		else j++;
 	}
 
-	for (int i = 0; i < lenpass; i++)
+	for (int i = 0; i < lenPass; i++)
 	{
-		for (int ii = 0; ii < lenpass; ii++)
+		for (int ii = 0; ii < lenPass; ii++)
 		{
 			if (position[i] != 0 && position[ii] != 0)
 				if (i != ii)
@@ -183,14 +205,14 @@ void algoritm(string alfPass, string password, int numAudTemp)
 					}
 		}
 	}
-	cout << endl << "[####################..........]" << endl;
 }
 
-void appAlg(int numAudTemp, string AudioTemp, string AlgoritmTemp, string message, string password) {
+void ApplyAlg(int numAudTemp, string audioTemp, string algoritmTemp, string message, string password) {
 
-	ifstream AudioTempApp(AudioTemp, ios::binary);
-	ofstream AlgoritmTempApp(AlgoritmTemp, ios::binary);
+	ifstream AudioTempApp(audioTemp, ios::binary);
+	ofstream AlgoritmTempApp(algoritmTemp, ios::binary);
 
+	//Bubble sort
 	int tmp = 0; char zz;
 	for (int i = 0; i < message.length(); i++) { 
 		for (int j = (message.length() - 1); j >= (i + 1); j--) {
@@ -208,6 +230,7 @@ void appAlg(int numAudTemp, string AudioTemp, string AlgoritmTemp, string messag
 		} 
 	}
 	
+	//Apply Algoritm to file
 	bool booln = true;
 	int N = 0;
 	int B = 0;
@@ -234,16 +257,16 @@ void appAlg(int numAudTemp, string AudioTemp, string AlgoritmTemp, string messag
 
 	AudioTempApp.close();
 	AlgoritmTempApp.close();
-	cout << endl << "[#########################.....]" << endl;
 }
 
 
 
-void alttransform(string newAudioFile, string AlgoritmTemp, int numAudTemp)
+void AltTransform(string newAudioFile, string algoritmTemp, int numAudTemp)
 {
-	ifstream infile(AlgoritmTemp, ios::binary);
+	ifstream infile(algoritmTemp, ios::binary);
 	ofstream outfile(newAudioFile, ios::binary);
 
+	//Transform
 	int integear; char character; 
 	while (!infile.eof()) {
 		infile >> integear;
@@ -254,35 +277,34 @@ void alttransform(string newAudioFile, string AlgoritmTemp, int numAudTemp)
 	infile.close();
 	outfile.close();
 
-	cout << endl << "[##############################]" << endl;
 }
 
-void appAltAlg(string AudioTemp, string password, int numAudTemp)
+string ApplyAltAlg(string audioTemp, string password, int numAudTemp)
 {
 	string mainMess = "";
 	
-	ifstream AudioTempApp(AudioTemp, ios::binary);
+	ifstream AudioTempApp(audioTemp, ios::binary);
 	
+	//Check password
 	int N;
 	for (int i = 0; i < numAudTemp; i++) {
 		AudioTempApp >> N;
 		if (i == ((position[0])))
 		{
-			if (N != 64) { cout << "Error"; //64(@)
-			return;
+			if (N != 64) { //64(@)
+			return "Error";
 			}
 		}
 	}
 
 	char pos; char first;
-
 	for (int i = 0, pos = 0; i < numAudTemp; i++)
 	{
 		AudioTempApp >> N;
-		if (pos < lenpass)
+		if (pos < lenPass)
 			if (i == (position[pos]+1))
 			{
-				if (N == 61) { i = numAudTemp;break; }//61('=')
+				if (N == 61) { i = numAudTemp; break; }//61('=')
 
 				mainMess += N;
 				pos++; i = 0;
@@ -294,8 +316,7 @@ void appAltAlg(string AudioTemp, string password, int numAudTemp)
 	
 	AudioTempApp.close();
 
-	cout << endl << "[##############################]" << endl;
 	
 	mainMess[0] = ' ';
-	cout << endl << endl << "Message:" << endl << mainMess << endl << endl;
+	return mainMess;
 }
